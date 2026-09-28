@@ -17,22 +17,15 @@ use ::regex::Regex as TextRegex;
 use serde::{Deserialize, Serialize};
 
 use std::fmt::{Debug, Display};
-use std::sync::OnceLock;
 
-fn spdx_regex() -> &'static TextRegex {
-    static RE: OnceLock<TextRegex> = OnceLock::new();
-    RE.get_or_init(|| {
-        TextRegex::new(
-            r"(?m)^\s*(?://|#|/\*+|\*)\s*SPDX-License-Identifier\s*:\s*(.+?)\s*(?:\*/)?\s*$",
-        )
-        .expect("hard-coded SPDX regex should be valid")
-    })
+lazy_static::lazy_static! {
+    static ref SPDX: TextRegex =
+        TextRegex::new(r"(?m)SPDX-License-Identifier\s*:\s*(.+?)\s*(?:\*/)?\s*$").unwrap();
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema-version", derive(schemars::JsonSchema))]
 pub struct CodeBlockLicense<S> {
-    pub language: S,
     pub license: S,
 }
 
@@ -44,7 +37,6 @@ where
         let mut visitor = Visitor {
             ctx,
             slug,
-            language: self.language.as_ref(),
             license: self.license.as_ref(),
         };
 
@@ -57,7 +49,6 @@ where
 struct Visitor<'a, 'b, 'c> {
     ctx: &'c Context<'a, 'b>,
     slug: &'c str,
-    language: &'c str,
     license: &'c str,
 }
 
@@ -65,12 +56,7 @@ impl<'a, 'b, 'c> tree::Visitor for Visitor<'a, 'b, 'c> {
     type Error = Error;
 
     fn enter_code_block(&mut self, ast: &Ast, node: &NodeCodeBlock) -> Result<Next, Self::Error> {
-        let info = node.info.split_whitespace().next().unwrap_or("");
-        if info != self.language {
-            return Ok(Next::SkipChildren);
-        }
-
-        let captures = match spdx_regex().captures(&node.literal) {
+        let captures = match SPDX.captures(&node.literal) {
             Some(c) => c,
             None => return Ok(Next::SkipChildren),
         };
@@ -81,8 +67,8 @@ impl<'a, 'b, 'c> tree::Visitor for Visitor<'a, 'b, 'c> {
         }
 
         let label = format!(
-            "code block of type `{}` must use license `{}`, not `{}`",
-            self.language, self.license, actual,
+            "code block must use license `{}`, not `{}`",
+            self.license, actual,
         );
         let source = self.ctx.ast_lines(ast);
         self.ctx.report(

@@ -206,7 +206,6 @@ where
 
             Self::MarkdownCodeBlockLicense(l) => {
                 DefaultLint::MarkdownCodeBlockLicense(markdown::CodeBlockLicense {
-                    language: l.language.as_ref(),
                     license: l.license.as_ref(),
                 })
             }
@@ -371,7 +370,6 @@ impl From<DefaultLint<&str>> for DefaultLint<String> {
 
             DefaultLint::MarkdownCodeBlockLicense(l) => {
                 DefaultLint::MarkdownCodeBlockLicense(markdown::CodeBlockLicense {
-                    language: l.language.to_string(),
                     license: l.license.to_string(),
                 })
             }

@@ -25,11 +25,8 @@ interface FooToken {}
     let reports = Linter::<Text<String>>::default()
         .clear_lints()
         .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
         )
         .check_slice(None, src)
         .run()
@@ -39,7 +36,7 @@ interface FooToken {}
 
     assert_eq!(
         reports,
-        r#"error[markdown-solidity-license]: code block of type `solidity` must use license `CC0-1.0`, not `MIT`
+        r#"error[markdown-code-block-license]: code block must use license `CC0-1.0`, not `MIT`
   |
 5 | / ```solidity
 6 | | // SPDX-License-Identifier: MIT
@@ -68,11 +65,8 @@ interface FooToken {}
     let reports = Linter::<Text<String>>::default()
         .clear_lints()
         .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
         )
         .check_slice(None, src)
         .run()
@@ -97,11 +91,8 @@ interface FooToken {}
     let reports = Linter::<Text<String>>::default()
         .clear_lints()
         .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
         )
         .check_slice(None, src)
         .run()
@@ -113,25 +104,22 @@ interface FooToken {}
 }
 
 #[tokio::test]
-async fn different_language_is_ignored() {
+async fn other_language_is_flagged() {
     let src = r#"---
 header: value1
 ---
 
-```rust
-// SPDX-License-Identifier: MIT
-fn main() {}
+```python
+# SPDX-License-Identifier: MIT
+print("hello")
 ```
 "#;
 
     let reports = Linter::<Text<String>>::default()
         .clear_lints()
         .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
         )
         .check_slice(None, src)
         .run()
@@ -139,7 +127,33 @@ fn main() {}
         .unwrap()
         .into_inner();
 
-    assert_eq!(reports, "");
+    assert!(reports.contains("must use license `CC0-1.0`, not `MIT`"));
+}
+
+#[tokio::test]
+async fn no_comment_prefix() {
+    let src = r#"---
+header: value1
+---
+
+```
+SPDX-License-Identifier: MIT
+```
+"#;
+
+    let reports = Linter::<Text<String>>::default()
+        .clear_lints()
+        .deny(
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
+        )
+        .check_slice(None, src)
+        .run()
+        .await
+        .unwrap()
+        .into_inner();
+
+    assert!(reports.contains("must use license `CC0-1.0`, not `MIT`"));
 }
 
 #[tokio::test]
@@ -157,42 +171,8 @@ interface FooToken {}
     let reports = Linter::<Text<String>>::default()
         .clear_lints()
         .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
-        )
-        .check_slice(None, src)
-        .run()
-        .await
-        .unwrap()
-        .into_inner();
-
-    assert!(reports.contains("must use license `CC0-1.0`, not `MIT`"));
-}
-
-#[tokio::test]
-async fn language_with_info_string_attrs() {
-    // Some markdown renderers allow extra info on the fence, e.g. ``` solidity {.foo}
-    let src = "---
-header: value1
----
-
-```solidity {.line-numbers}
-// SPDX-License-Identifier: MIT
-interface FooToken {}
-```
-";
-
-    let reports = Linter::<Text<String>>::default()
-        .clear_lints()
-        .deny(
-            "markdown-solidity-license",
-            CodeBlockLicense {
-                language: "solidity",
-                license: "CC0-1.0",
-            },
+            "markdown-code-block-license",
+            CodeBlockLicense { license: "CC0-1.0" },
         )
         .check_slice(None, src)
         .run()

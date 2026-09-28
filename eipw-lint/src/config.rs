@@ -94,9 +94,8 @@ fn default_lints() -> impl Iterator<Item = (&'static str, DefaultLint<&'static s
             }),
         ),
         (
-            "markdown-solidity-license",
+            "markdown-code-block-license",
             MarkdownCodeBlockLicense(markdown::CodeBlockLicense {
-                language: "solidity",
                 license: "CC0-1.0",
             }),
         ),

@@ -2,15 +2,15 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>markdown-solidity-license</title>
+		<title>markdown-code-block-license</title>
 		<link rel="stylesheet" href="../main.css">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 	</head>
 	<body>
 		<article>
-			<h1><code>markdown-solidity-license</code></h1>
+			<h1><code>markdown-code-block-license</code></h1>
 			<p>
-				Inline Solidity code blocks that declare a
+				Code blocks that declare a
 				<code>SPDX-License-Identifier</code> must use
 				<code>CC0-1.0</code>.
 			</p>
@@ -18,7 +18,7 @@
 			<section>
 				<h2>Examples</h2>
 
-				<pre>error[markdown-solidity-license]: code block of type `solidity` must use license `CC0-1.0`, not `MIT`
+				<pre>error[markdown-code-block-license]: code block must use license `CC0-1.0`, not `MIT`
  --> input.md
   |
 5 | / ```solidity
@@ -35,9 +35,10 @@
 					Per
 					<a href="https://eips.ethereum.org/EIPS/eip-1">EIP-1</a>,
 					proposals are licensed under
-					<code>CC0-1.0</code>. Solidity snippets included inside
-					an EIP are part of the proposal and must carry the same
-					license when they declare one.
+					<code>CC0-1.0</code>. Code snippets included inside an
+					EIP are part of the proposal and must carry the same
+					license when they declare one, regardless of the
+					snippet's language.
 				</p>
 				<p>
 					Code blocks without a
